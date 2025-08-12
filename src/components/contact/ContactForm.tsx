@@ -26,47 +26,13 @@ export default function ContactForm() {
     referralSource: false
   });
 
-  const projectTypes = [
-    '기업 홍보영상',
-    '제품 소개영상',
-    '브랜드 스토리',
-    '광고 제작',
-    '이벤트 영상',
-    '교육 콘텐츠',
-    '기타'
-  ];
+  const [loading, setLoading] = useState(false); // New loading state
 
-  const projectDetails = [
-    '1-2분 길이',
-    '3-5분 길이',
-    '5-10분 길이',
-    '10분 이상',
-    '시리즈 형태'
-  ];
-
-  const budgets = [
-    '500만원 미만',
-    '500-1000만원',
-    '1000-3000만원',
-    '3000만원 이상',
-    '예산 협의'
-  ];
-
-  const timelines = [
-    '1주일 이내',
-    '2주일 이내',
-    '1개월 이내',
-    '2개월 이내',
-    '협의 가능'
-  ];
-
-  const referralSources = [
-    '검색엔진',
-    '지인 추천',
-    'SNS',
-    '온라인 광고',
-    '기타'
-  ];
+  const projectTypes = ['기업 홍보영상', '제품 소개영상', '브랜드 스토리', '광고 제작', '이벤트 영상', '교육 콘텐츠', '기타'];
+  const projectDetails = ['1-2분 길이', '3-5분 길이', '5-10분 길이', '10분 이상', '시리즈 형태'];
+  const budgets = ['500만원 미만', '500-1000만원', '1000-3000만원', '3000만원 이상', '예산 협의'];
+  const timelines = ['1주일 이내', '2주일 이내', '1개월 이내', '2개월 이내', '협의 가능'];
+  const referralSources = ['검색엔진', '지인 추천', 'SNS', '온라인 광고', '기타'];
 
   const validateField = (name: string, value: string | boolean): string => {
     switch (name) {
@@ -137,6 +103,7 @@ export default function ContactForm() {
   };
 
   const toggleDropdown = (field: keyof typeof dropdownStates) => {
+    if (loading) return; // Prevent open while submitting
     setDropdownStates(prev => ({
       ...prev,
       [field]: !prev[field]
@@ -151,8 +118,9 @@ export default function ContactForm() {
     });
 
     setErrors(newErrors);
-    
+
     if (Object.keys(newErrors).length === 0) {
+      setLoading(true); // Start loading
       try {
         const response = await fetch('https://video-crew-backend-production.up.railway.app/api/contact/', {
           method: 'POST',
@@ -161,29 +129,42 @@ export default function ContactForm() {
           },
           body: JSON.stringify(formData)
         });
-        
+
         if (response.ok) {
           alert('문의가 성공적으로 전송되었습니다!');
+          // FULL reset: form, dropdown states, and errors
           setFormData({
-            name: '',
-            email: '',
-            company: '',
-            website: '',
-            projectType: '',
-            projectDetails: '',
-            budget: '',
-            timeline: '',
-            referralSource: '',
-            description: '',
-            socialMedia: '',
+             name: '',
+    email: '',
+    company: '',
+    website: '',
+    projectType: '',
+    projectDetails: '',
+    budget: '',
+    timeline: '',
+    referralSource: '',
+    description: '',
+    socialMedia: '',
             privacyPolicy: false
           });
+          setDropdownStates({
+            projectType: false,
+            projectDetails: false,
+            budget: false,
+            timeline: false,
+            referralSource: false
+          });
+                    window.location.reload(); // Refresh after success
+
+          setErrors({});
         } else {
           alert('문의 전송에 실패했습니다. 다시 시도해주세요.');
         }
       } catch (error) {
         console.error('Error submitting form:', error);
         alert('문의 전송에 실패했습니다. 다시 시도해주세요.');
+      } finally {
+        setLoading(false); // End loading
       }
     }
   };
@@ -228,7 +209,12 @@ export default function ContactForm() {
   );
 
   return (
-    <div className="py-6 md:py-12 px-4 md:px-6">
+    <div className="relative py-6 md:py-12 px-4 md:px-6">
+ {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center">
+          <div className="text-white text-xl animate-pulse">전송중...</div>
+        </div>
+      )}
       <div className="max-w-6xl mx-auto">
         <h1 className="text-2xl md:text-4xl font-bold text-center mb-8 md:mb-12">Contact Us</h1>
 
@@ -395,13 +381,14 @@ export default function ContactForm() {
           </div>
           {errors.privacyPolicy && <p className="text-red-500 text-xs md:text-sm">{errors.privacyPolicy}</p>}
 
-          <div className="text-center pt-4 md:pt-6">
+         <div className="text-center pt-4 md:pt-6">
             <button
               type="button"
               onClick={handleSubmit}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 md:px-20 py-2 md:py-3 rounded-full font-medium transition-colors w-full md:w-64 text-sm md:text-base"
+              disabled={loading}
+              className={`bg-blue-600 hover:bg-blue-700 text-white px-8 md:px-20 py-2 md:py-3 rounded-full font-medium transition-colors w-full md:w-64 text-sm md:text-base ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              제출하기
+              {loading ? '전송중...' : '제출하기'}
             </button>
           </div>
         </div>
