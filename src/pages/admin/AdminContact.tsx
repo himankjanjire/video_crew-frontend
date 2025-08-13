@@ -72,14 +72,14 @@ export default function AdminContact() {
   };
 
   return (
-    <div className="p-4 lg:p-8 pt-16 lg:pt-8 min-h-screen">
-      <div className="max-w-6xl mx-auto">
+    <div className="p-4 lg:p-8 min-h-screen">
+      <div className="w-full max-w-full">
         <h1 className="text-2xl lg:text-3xl font-bold mb-6 lg:mb-8">
           Contact Management
         </h1>
 
         <div className="bg-gray-900 rounded-lg overflow-hidden">
-          <div className="max-h-[85vh] overflow-auto">
+          <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
               <thead className="bg-gray-800 sticky top-0">
                 <tr>

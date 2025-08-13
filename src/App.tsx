@@ -32,7 +32,7 @@ function AdminLayout() {
     <ProtectedRoute>
       <div className="bg-black text-white font-sans flex min-h-screen">
         <AdminSidebar />
-        <main className="flex-1 lg:ml-64 w-full">
+        <main className="flex-1 lg:ml-64 overflow-x-auto">
           <Outlet />
         </main>
       </div>
